@@ -16,6 +16,9 @@
       "path": "localSchemaArray"
     },
     {
+      "path": "multiProjectSubfolders"
+    },
+    {
       "path": "rover"
     },
     {

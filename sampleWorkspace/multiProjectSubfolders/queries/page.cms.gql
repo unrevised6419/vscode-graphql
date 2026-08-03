@@ -1,0 +1,7 @@
+query CmsPageQuery {
+  cmsPage(slug: "home") {
+    slug
+    title
+    body
+  }
+}

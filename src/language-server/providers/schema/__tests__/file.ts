@@ -62,6 +62,39 @@ describe("FileSchemaProvider", () => {
     }
   });
 
+  describe("loadFileAndGetDocument", () => {
+    // Regression test for apollographql/vscode-graphql#302: go-to-definition on
+    // a schema field must point at the schema file relative to the config
+    // directory, not relative to the process working directory.
+    it("resolves the source URI relative to the config directory", () => {
+      writeFilesToDir(dir, {
+        "schema.graphql": `
+          type Query {
+            hello: String
+          }
+        `,
+      });
+
+      const configDir = URI.from({ scheme: "file", path: dirPath });
+      const provider = new FileSchemaProvider(
+        { path: "./schema.graphql" },
+        configDir,
+      );
+
+      const document = provider.loadFileAndGetDocument("./schema.graphql");
+      const sourceName = document.definitions[0].loc?.source.name;
+
+      const expectedUri = URI.file(
+        path.resolve(dirPath, "schema.graphql"),
+      ).toString();
+      expect(sourceName).toBe(expectedUri);
+      // it must NOT resolve against process.cwd()
+      expect(sourceName).not.toBe(
+        URI.file(path.resolve(process.cwd(), "schema.graphql")).toString(),
+      );
+    });
+  });
+
   describe("resolveFederatedServiceSDL", () => {
     it("finds and loads sdl from graphql file for a federated service", async () => {
       writeFilesToDir(dir, {

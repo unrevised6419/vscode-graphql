@@ -1,0 +1,9 @@
+type Query {
+  cmsPage(slug: String!): CmsPage
+}
+
+type CmsPage {
+  slug: String!
+  title: String
+  body: String
+}

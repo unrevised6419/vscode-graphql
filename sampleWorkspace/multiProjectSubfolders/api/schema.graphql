@@ -1,0 +1,9 @@
+type Query {
+  apiProduct(id: ID!): ApiProduct
+}
+
+type ApiProduct {
+  id: ID!
+  name: String
+  sku: String
+}

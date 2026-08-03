@@ -218,7 +218,12 @@ export abstract class GraphQLInternalProject
           ? localSchemaFile
           : [localSchemaFile]
     ).map((filePath) =>
-      path.relative(this.rootURI.fsPath, path.join(process.cwd(), filePath)),
+      // localSchemaFile is relative to the config file's directory (rootURI),
+      // not the process working directory.
+      path.relative(
+        this.rootURI.fsPath,
+        path.resolve(this.rootURI.fsPath, filePath),
+      ),
     );
   }
 

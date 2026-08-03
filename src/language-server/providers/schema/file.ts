@@ -79,7 +79,7 @@ export class FileSchemaProvider implements GraphQLSchemaProvider {
       const schema = buildClientSchema({ __schema });
       return parse(printSchema(schema));
     } else if (ext === ".graphql" || ext === ".graphqls" || ext === ".gql") {
-      const uri = URI.file(resolve(path)).toString();
+      const uri = URI.file(this.resolvePath(path)).toString();
       return parse(new Source(result, uri));
     }
     throw new Error(
@@ -161,15 +161,21 @@ export class FileSchemaProvider implements GraphQLSchemaProvider {
     }
   }
 
-  private readFileSync(path: string) {
-    let finalPath = path;
-    if (!isAbsolute(finalPath) && this.configDir) {
-      const resolvedPath = resolve(this.configDir?.fsPath, path);
+  // Resolve a (possibly relative) schema path against the config file's
+  // directory, matching how the file is actually read. Falls back to the raw
+  // path so URIs stay stable even when the file can't be found on disk.
+  private resolvePath(path: string) {
+    if (!isAbsolute(path) && this.configDir) {
+      const resolvedPath = resolve(this.configDir.fsPath, path);
       if (existsSync(resolvedPath)) {
-        finalPath = resolvedPath;
+        return resolvedPath;
       }
     }
-    return readFileSync(finalPath, {
+    return path;
+  }
+
+  private readFileSync(path: string) {
+    return readFileSync(this.resolvePath(path), {
       encoding: "utf-8",
     });
   }
